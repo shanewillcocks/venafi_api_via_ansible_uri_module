@@ -1,0 +1,15 @@
+---
+debug_mode: true
+venafi_url: "https://venafi.url"
+venafi_zone: "\\VED\\Policy\\Certificates\\Internal\\Web Server"
+cert_pwd: "<PWD>"
+venafi_certs:
+  fqdn: <FQDN>
+  subject_alt_names:
+    - <SAN1>
+    - <SANn>
+  ip_addresses:
+    - <IP1>
+    - <IPn>
+venafi_working_dir: "/tmp/{{ venafi_certs.fqdn }}"
+san_file: "{{ venafi_working_dir }}/san_list.json"
