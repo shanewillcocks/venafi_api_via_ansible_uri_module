@@ -14,7 +14,6 @@
     - name: venafi_user
       prompt: "Venafi username"
       private: false
-      default: VenAPI_FCM API
     - name: venafi_pwd
       prompt: "Venafi password"
       private: true
@@ -32,4 +31,3 @@
     - include_tasks: request_certs.yml
     - include_tasks: retrieve_certs.yml
     - include_tasks: revoke_auth.yml
-    
