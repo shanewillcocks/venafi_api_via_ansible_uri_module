@@ -1,0 +1,27 @@
+---
+# Step 1. Authenticate and retrieve access token
+- name: Authenticate to Venafi
+  uri:
+    url: "{{ venafi_url }}/vedauth/authorize/oauth"
+    url_username: "{{ venafi_user }}"
+    url_password: "{{ venafi_pwd }}"
+    force_basic_auth: true
+    timeout: 60
+    method: POST
+    headers:
+      Accept: 'application/json'
+      Content-Type: 'application/json'
+    body: "{ \"username\": \"{{ venafi_user }}\", \"password\": \"{{ venafi_pwd }}\",  \"client_id\": \"vcert-sdk\", \"scope\": \"certificate:manage,revoke;configuration:manage\" }"
+    body_format: json
+    status_code: 200
+  register: venafi_auth_reg
+
+- name: Set auth facts
+  block:
+    - set_fact:
+        access_token: "{{ venafi_auth_reg.json.access_token }}"
+    - set_fact:
+        authenticated: true
+    - debug:
+        msg: "Auth succeeded, retrieved Venafi access token"
+  when: venafi_auth_reg.status == 200
