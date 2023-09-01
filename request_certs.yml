@@ -1,0 +1,29 @@
+---
+# Step 3. Send certificate request to venafi
+# Note: We have to read the SAN list back in from the temp file created in Step 2
+- name: Read in san file
+  set_fact:
+    san_json: "{{ lookup('file','{{ san_file }}') }}"
+
+- name: Send certificate request to Venafi
+  uri:
+    url: "{{ venafi_url }}/vedsdk/certificates/Request"
+    method: POST
+    headers:
+      Authorization: "Bearer {{ access_token }}"
+      Content-Type: 'application/json'
+    body: "{ \"Subject\": \"{{ venafi_certs.fqdn }}\", \"Format\": \"Base64\", \"Password\": \"{{ cert_pwd }}\", \"PolicyDN\": \"{{ venafi_zone }}\", \"SubjectAltNames\": \"{{ san_json }}\", \"IncludePrivateKey\": true, \"IncludeChain\": true, \"RootFirstOrder\": false, \"WorkToDoTimeout\": \"30\" }"
+    body_format: json
+  register: request_cert_reg
+
+- name: Dump json repsonse from Venafi
+  debug:
+    msg: "{{ request_cert_reg }}"
+  when: debug_mode|bool
+
+- name: Parse certificate DN
+  set_fact:
+    cert_dn: "{{ request_cert_reg.json.CertificateDN }}"
+
+- debug:
+    msg: "Got cerificate DN: {{ cert_dn }}"
