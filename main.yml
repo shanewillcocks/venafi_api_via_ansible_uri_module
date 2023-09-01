@@ -1,0 +1,35 @@
+---
+# 1. Authenticate and retrieve access token
+# 2. Format san json from venafi_cert vars
+# 3. Send certificate request to venafi
+# 4. Retrieve cert and create cert files
+# 5. Revoke access token
+- hosts: all
+  become: true
+  become_method: sudo
+  become_user: root
+  gather_facts: false
+  vars_files: vars.yml
+  vars_prompt:
+    - name: venafi_user
+      prompt: "Venafi username"
+      private: false
+      default: VenAPI_FCM API
+    - name: venafi_pwd
+      prompt: "Venafi password"
+      private: true
+    - name: cert_pwd
+      prompt: "Certificate password"
+      private: true
+
+  tasks:
+    - name: Ensure cert directory exists
+      file:
+        path: "{{ venafi_working_dir }}"
+        state: directory
+    - include_tasks: auth.yml
+    - include_tasks: format_san_json.yml
+    - include_tasks: request_certs.yml
+    - include_tasks: retrieve_certs.yml
+    - include_tasks: revoke_auth.yml
+    
