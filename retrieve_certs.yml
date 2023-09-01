@@ -1,0 +1,42 @@
+---
+# Step 4. Retrieve cert and create cert files
+# TODO: Is there a better way to use openssl here?
+- name: Retrieve certificate from Venafi
+  uri:
+    url: "{{ venafi_url }}/vedsdk/certificates/Retrieve"
+    method: POST
+    headers:
+      Authorization: "Bearer {{ access_token }}"
+      Content-Type: 'application/json'
+    body: "{ \"CertificateDN\": \"{{ cert_dn }}\", \"Format\": \"Base64\", \"Password\": \"{{ cert_pwd }}\", \"IncludePrivateKey\": true, \"IncludeChain\": true, \"RootFirstOrder\": false, \"WorkToDoTimeout\": \"30\" }"
+    body_format: json
+    status_code: 200
+  register: retrieve_cert_reg
+
+- name: Parse certificate response data
+  block:
+    - set_fact:
+        certificate_data: "{{ retrieve_cert_reg.json.CertificateData }}"
+    - set_fact:
+        cert_filename: "{{ retrieve_cert_reg.json.Filename }}"
+    - name: Ensure local cert directory exists
+      file:
+        path: "{{ venafi_working_dir }}"
+        state: directory
+    - name: Save PEM certificate file
+      copy:
+        content: "{{ certificate_data }}"
+        dest: "{{ venafi_working_dir }}/{{ cert_filename }}"
+    - name: Decode and save certificate and private key
+      shell: /usr/bin/base64 --decode "{{ venafi_working_dir }}/{{ cert_filename }}" > "{{ venafi_working_dir }}/{{ venafi_certs.fqdn }}.cert"
+    - name: Extract the private key to a tmp file
+      shell: /usr/bin/cat "{{ venafi_working_dir }}/{{ venafi_certs.fqdn }}.cert" | /usr/bin/sed -ne '/-BEGIN RSA PRIVATE KEY-/,/-END RSA PRIVATE KEY-/p' > "{{ venafi_working_dir }}/{{ venafi_certs.fqdn }}.key.tmp"
+    - name: Convert the private key
+      shell: /usr/bin/openssl rsa -in "{{ venafi_working_dir }}/{{ venafi_certs.fqdn }}.key.tmp" -passin pass:"{{ cert_pwd }}" -text > "{{ venafi_working_dir }}/{{ venafi_certs.fqdn }}.key" 2>/dev/null
+    - name: Convert pubcert and private key
+      shell: /usr/bin/openssl x509 -inform PEM -in "{{ venafi_working_dir }}/{{ venafi_certs.fqdn }}.cert" > "{{ venafi_working_dir }}/{{ venafi_certs.fqdn }}.crt"
+    - name: Remove tmp key file
+      file:
+        path: "{{ venafi_working_dir }}/{{ venafi_certs.fqdn }}.key.tmp"
+        state: absent
+  when: retrieve_cert_reg.status == 200
