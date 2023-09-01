@@ -1,6 +1,5 @@
 ---
 # Step 4. Retrieve cert and create cert files
-# TODO: Is there a better way to use openssl here?
 - name: Retrieve certificate from Venafi
   uri:
     url: "{{ venafi_url }}/vedsdk/certificates/Retrieve"
@@ -19,10 +18,16 @@
         certificate_data: "{{ retrieve_cert_reg.json.CertificateData }}"
     - set_fact:
         cert_filename: "{{ retrieve_cert_reg.json.Filename }}"
-    - name: Ensure local cert directory exists
-      file:
-        path: "{{ venafi_working_dir }}"
-        state: directory
+
+    - name: Remove and recreate cert working directory
+      block:
+        - file:
+            path: "{{ venafi_working_dir }}"
+            state: absent
+        - file:
+            path: "{{ venafi_working_dir }}"
+            state: directory
+            mode: 0777
     - name: Save PEM certificate file
       copy:
         content: "{{ certificate_data }}"
@@ -38,5 +43,7 @@
     - name: Remove tmp key file
       file:
         path: "{{ venafi_working_dir }}/{{ venafi_certs.fqdn }}.key.tmp"
+        state: absent
+  when: retrieve_cert_reg.status == 200
         state: absent
   when: retrieve_cert_reg.status == 200
