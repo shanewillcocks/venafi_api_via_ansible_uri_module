@@ -34,6 +34,4 @@
   block:
     - debug:
         msg: "{{ san_list }}"
-    - debug:
-        msg: "{{ san_list|type_debug }}"
   when: debug_mode|bool
