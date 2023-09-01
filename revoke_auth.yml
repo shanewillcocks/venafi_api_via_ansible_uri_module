@@ -1,0 +1,15 @@
+---
+# Step 5. Revoke access token
+- name: Revoke authentication token
+  uri:
+    url: "{{ venafi_url }}/vedauth/Revoke/token"
+    method: GET
+    headers:
+      Accept: 'application/json'
+      Authorization: "Bearer {{ access_token }}"
+  register: revoke_token_reg
+  when: authenticated|bool == true
+
+- debug:
+    msg: "Access token revoked"
+  when: revoke_token_reg.status == 200
