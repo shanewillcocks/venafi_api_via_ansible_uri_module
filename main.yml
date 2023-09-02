@@ -19,7 +19,7 @@
       private: true
 
   tasks:
-    - include_tasks: authenticate.yml
+    - include_tasks: auth.yml
     - include_tasks: format_san_list.yml
     - include_tasks: request_certs.yml
     - include_tasks: retrieve_certs.yml
