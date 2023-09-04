@@ -1,7 +1,5 @@
 ---
 # Step 2. Format san json from venafi_cert vars
-# Note: We have to save to a file as adding the list dynamically as Ansible sorts
-# sorts the keys alphabetically which causes the cert request API call to fail - fix this later
 - name: Format Subject Alt Names (list of dictionaries)
   block:
     - set_fact:
@@ -25,10 +23,6 @@
             }]
           }}
       loop: "{{ venafi_certs.ip_addresses }}"
-    - name: Save json to a temporary file
-      copy:
-        content: "{{ san_list }}"
-        dest: "{{ san_file }}"
 
 - name: Dump san details
   block:
