@@ -12,4 +12,3 @@ venafi_certs:
     - <IP1>
     - <IPn>
 venafi_working_dir: "/tmp/{{ venafi_certs.fqdn }}"
-san_file: "{{ venafi_working_dir }}/san_list.json"
