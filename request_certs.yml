@@ -1,15 +1,8 @@
 ---
 # Step 3. Send certificate request to venafi
-# Note: We have to read the SAN list back in from the temp file created in Step 2
-- name: Read in san file and format message body
-  block:
-    - slurp:
-        src: "{{ san_file }}"
-      register: slurp_reg
-    - set_fact:
-        san_json: "{{ slurp_reg.content|b64decode }}"
-    - set_fact:
-       msg_body: '{ "Subject": "{{ venafi_certs.fqdn }}", "Format": "Base64", "Password": "{{ cert_pwd }}", "PolicyDN": "{{ venafi_zone }}", "SubjectAltNames": {{ san_json|to_json }}, "IncludePrivateKey": true, "IncludeChain": true, "RootFirstOrder": false, "WorkToDoTimeout": "30" }'
+- name: Format message body
+ set_fact:
+   msg_body: '{ "Subject": "{{ venafi_certs.fqdn }}", "Format": "Base64", "Password": "{{ cert_pwd }}", "PolicyDN": "{{ venafi_zone }}", "SubjectAltNames": {{ san_list|to_json }}, "IncludePrivateKey": true, "IncludeChain": true, "RootFirstOrder": false, "WorkToDoTimeout": "30" }'
 
 - name: Dump contents of san file and msg body
   debug:
