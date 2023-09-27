@@ -45,5 +45,3 @@
         path: "{{ venafi_working_dir }}/{{ venafi_certs.fqdn }}.key.tmp"
         state: absent
   when: retrieve_cert_reg.status == 200
-        state: absent
-  when: retrieve_cert_reg.status == 200
