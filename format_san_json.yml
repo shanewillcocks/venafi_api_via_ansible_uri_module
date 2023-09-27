@@ -2,7 +2,8 @@
 # Step 2. Format san json from venafi_cert vars
 - name: Format Subject Alt Names (list of dictionaries)
   block:
-    - set_fact:
+    - name: Add DNS names to SAN dict
+      set_fact:
         san_list: >-
           {{
             san_list | default([]) +
