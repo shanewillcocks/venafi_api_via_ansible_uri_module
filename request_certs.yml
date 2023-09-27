@@ -30,4 +30,4 @@
     cert_dn: "{{ request_cert_reg.json.CertificateDN }}"
 
 - debug:
-    msg: "Got cerificate DN: {{ cert_dn }}"
+    msg: "Got certificate DN: {{ cert_dn }}"
