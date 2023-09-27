@@ -1,5 +1,5 @@
 ---
-# Step 1. Authenticate and retrieve access token
+# Start here - prompt for venafi creds and a passord for the privkey
 - hosts: all
   become: true
   become_method: sudo
